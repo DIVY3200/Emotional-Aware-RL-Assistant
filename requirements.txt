@@ -1,0 +1,13 @@
+opencv-python
+tensorflow
+keras
+stable-baselines3
+gymnasium
+torch
+numpy
+pillow
+matplotlib
+pandas
+tqdm
+deepface
+google-generativeai
