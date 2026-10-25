@@ -1,14 +1,40 @@
-opencv-python
-tensorflow
-keras
-stable-baselines3
-gymnasium
-torch
-numpy
-pillow
-matplotlib
-pandas
-tqdm
-deepface
-google-generativeai
-scikit-learn
+# Exact versions this project was tested with (Python 3.10, Windows 11, CPU).
+# Recommended install instead:  pip install -e ".[all]"   (see pyproject.toml extras)
+
+# core: simulator, training, evaluation
+numpy==2.2.6
+gymnasium==1.2.3
+stable-baselines3==2.8.0
+sb3-contrib==2.8.0
+torch==2.11.0
+PyYAML==6.0.3
+matplotlib==3.10.8
+pandas==2.3.3
+scipy==1.15.3
+scikit-learn==1.7.2
+pillow==12.2.0
+
+# vision
+opencv-python==4.13.0.92
+deepface==0.0.99
+tensorflow==2.21.0
+tf-keras==2.21.0
+hsemotion-onnx==0.3.1
+onnxruntime==1.23.2
+
+# live assistant
+google-genai==1.73.1
+pyttsx3==2.99
+python-dotenv==1.2.2
+pywin32==311; sys_platform == "win32"
+
+# optional voice input
+faster-whisper==1.2.1
+sounddevice==0.5.6
+
+# web demo
+streamlit==1.65.0
+
+# development
+pytest==9.1.1
+ruff==0.17.2

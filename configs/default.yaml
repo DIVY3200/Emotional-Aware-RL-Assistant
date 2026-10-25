@@ -1,0 +1,50 @@
+# Default settings for the live assistant. Override any value on the command line,
+# e.g.  python -m emotion_rl.assistant.app --camera 1 --policy rule_cooldown
+
+assistant:
+  camera: 0                    # webcam index (DirectShow numbering on Windows: Brio 100 = 0 here)
+  camera_backend: auto         # auto = DirectShow on Windows (Media Foundation took >2 min to open a Brio)
+  camera_width: 1280
+  camera_height: 720
+  microphone: null             # name or part of it, e.g. "Brio"; null = Windows default input
+  policy: ppo_personalised     # ppo | ppo_personalised | rule_cooldown | rule | random
+  model: models/ppo_best.zip   # trained agent (see README > Reproduce)
+  decision_interval: 4.0       # seconds between decisions (one simulator turn)
+  detector_backend: yunet      # DeepFace face detector: yunet (fast, accurate), retinaface, opencv, ...
+  emotion_model: auto          # auto = your camera-check profile; or deepface, hsemotion, path/to/emotion_cnn.pt
+  user: anonymous              # profile name for online personalisation
+  log_dir: data/interactions   # JSONL interaction logs (no images are stored)
+  profile_dir: data/profiles   # per-user personalisation profiles
+  mute: false
+  voice_input: false           # push-to-talk with faster-whisper (pip install -e ".[voice]")
+  stt_model: small.en          # speech-to-text: small.en (~2 s, robust) or base.en (faster)
+  save_audio: false            # keep Talk recordings in data/audio/ for debugging
+
+llm:
+  enabled: true
+  # "-latest" aliases follow the current stable models; pinned names get retired
+  models: [gemini-flash-lite-latest, gemini-3.5-flash-lite, gemini-flash-latest]
+  timeout_seconds: 8          # give up and use a local reply after this long
+  history_size: 4
+
+speech:
+  rate: 165
+  voice_hint: zira             # part of the Windows voice name to prefer
+  output: auto                 # speaker name or part of it; auto skips HDMI/monitor audio
+
+safety:
+  # Shown and spoken when what the user says suggests a crisis. Check the
+  # numbers for your country before deploying.
+  helpline_message: >-
+    It sounds like things are really hard right now, and you deserve support from a real
+    person. Please reach out to someone you trust or a helpline. In India you can call
+    Tele-MANAS on 14416; elsewhere, findahelpline.com lists free services near you.
+  low_mood_seconds: 180        # sustained negative expression before a gentle check-in
+
+study:
+  # Blinded condition codes for the user study (docs/user_study.md).
+  # Keep this mapping away from participants.
+  conditions:
+    A: ppo_personalised
+    B: rule_cooldown
+    C: random

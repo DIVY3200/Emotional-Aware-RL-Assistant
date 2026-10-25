@@ -219,3 +219,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ─── emotion_rl project ────────────────────────────────────────────────────────
+# training runs are reproducible with scripts/run_all_experiments.sh;
+# only the selected final model in models/ and the results/ figures are committed
+runs/
+ci_runs/
+ci_results/
+# participant / interaction data must never be committed
+data/

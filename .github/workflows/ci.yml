@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install (CPU-only torch, no TensorFlow/DeepFace needed for tests)
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]" opencv-python-headless
+      - name: Lint
+        run: ruff check src tests
+      - name: Test
+        run: pytest -q
+      - name: Evaluation smoke test
+        run: |
+          python -m emotion_rl.train --algo ppo --history-len 1 --tag ppo_no_memory --seeds 0 --timesteps 4096 --n-envs 2 --eval-every 2048 --out ci_runs
+          python -m emotion_rl.evaluate --runs ci_runs --out ci_results --quick

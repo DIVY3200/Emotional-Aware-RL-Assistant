@@ -1,0 +1,12 @@
+{
+  "algo": "ppo",
+  "env": {
+    "history_len": 1,
+    "observation_mode": "probs",
+    "detector_accuracy": 0.65,
+    "max_steps": 20,
+    "privileged": false
+  },
+  "source": "runs/ppo_no_memory/seed_3",
+  "validation_return": 4.371
+}
