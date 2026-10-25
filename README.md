@@ -51,10 +51,11 @@ presses.
 5. [Reproduce every number](#reproduce-every-number)
 6. [Emotion detection: measure it, or train your own](#emotion-detection-measure-it-or-train-your-own)
 7. [User study](#user-study)
-8. [Project structure](#project-structure)
-9. [Limitations and ethics](#limitations-and-ethics)
-10. [What changed from v1](#what-changed-from-v1)
-11. [References](#references)
+8. [Engineering process and testing](#engineering-process-and-testing)
+9. [Project structure](#project-structure)
+10. [Limitations and ethics](#limitations-and-ethics)
+11. [What changed from v1](#what-changed-from-v1)
+12. [References](#references)
 
 ---
 
@@ -381,6 +382,47 @@ Detector fixes in v2 ([`detector.py`](src/emotion_rl/detector.py)):
 - a Latin-square order, consent text and a questionnaire template
 - the analysis: `python -m emotion_rl.study` runs Friedman and Holm-corrected
   Wilcoxon tests on the logged valence changes and the questionnaire
+
+## Engineering process and testing
+
+**Development lifecycle.** The v2 rebuild went through each SDLC phase, and each phase
+left an artefact in this repository:
+
+| Phase | What was done | Where |
+|---|---|---|
+| Requirements | Audited v1 and reproduced each flaw before changing anything | [`legacy/v1/audit_v1.py`](legacy/v1/audit_v1.py) |
+| Design | MDP, user simulator, reward and evaluation protocol fixed before training | [The RL problem](#the-rl-problem), [`simulator.py`](src/emotion_rl/simulator.py) |
+| Implementation | Installable Python package with one config file | [`src/emotion_rl/`](src/emotion_rl/), [`configs/`](configs/) |
+| Testing | Unit, integration, end-to-end and live-hardware tests (below) | [`tests/`](tests/) |
+| Deployment | Model chosen on validation, live app, browser demo, Dockerfile | [`models/`](models/), [`Dockerfile`](Dockerfile) |
+| Maintenance | CI on every push, pinned dependencies, resumable experiments | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+
+**Testing** (87 automated tests, `pytest -q`):
+
+| Level | Tests | What they cover |
+|---|---|---|
+| Unit | 72 | simulator dynamics, reward (including a regression test for v1's sign bug), Gymnasium API compliance, policies and bandits, safety filters, LLM fallback and timeout (fake client), detector logic (fake DeepFace), calibration, speech end-pointing |
+| Integration | 15 | the live assistant's loop from detection to policy, reply, log and feedback; train, save, reload and evaluate; CNN training on a tiny dataset; user-study analysis; the Streamlit demo run headless |
+| End-to-end (CI) | 1 job | trains a small agent and runs the whole evaluation suite on every push |
+| Hardware acceptance | 4 live sessions | real webcam and microphone with a real user, using `camera_check` and an acoustic loopback test |
+
+The live sessions found 8 problems that no automated test could: speech routed to a
+monitor without speakers, pyttsx3 going silent after its first sentence, a 2-minute
+camera start-up, unclear key controls, the microphone recording the assistant's own
+voice, a calibration that caused false "disgust", sentences cut off by a fixed recording
+window, and Whisper inventing "Thank you." on silence. Five of the eight fixes have
+regression tests; the other three (Windows speech, camera start-up, microphone echo)
+depend on real hardware and were checked by hand.
+
+**Continuous integration.** GitHub Actions runs on every push and pull request, on
+Python 3.10 and 3.11: `ruff` lint, then the 87 tests, then the end-to-end evaluation
+check. Nothing deploys automatically (no continuous deployment): the Docker image and the
+model export are run by hand.
+
+**Iterative development.** The work was delivered in increments: the RL core, then
+online learning, then evaluation, then engineering. The live assistant went through four
+test, feedback and fix cycles with a real user. This is iterative and driven by feedback,
+but as a solo project it did not use formal Scrum practices such as sprints or stand-ups.
 
 ## Project structure
 
